@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+        <link rel="stylesheet" href="./assets/semantic/dist/semantic.min.css">
+        <link rel="stylesheet" href="./assets/styles/style.css">
+
+        <title>Anime.js Interface</title>
+    </head>
+    <body>
+
+        <!-- Menu -->
+        <div class="ui top fixed inverted tiny menu">
+            <div class="ui item">
+                <img src="./assets/images/logo.png" alt="Logo">
+            </div>
+            <div class="ui dropdown item">
+                File
+                <i class="dropdown icon"></i>
+                <div class="menu">
+                    <div class="item" id="nav_newFile">New File</div>
+                    <div class="item" id="nav_openFile">Open File</div>
+                    <div class="divider"></div>
+                    <div class="item" id="nav_save">Save</div>
+                    <div class="item" id="nav_saveAs">Save As...</div>
+                    <div class="item" id="nav_export">Export</div>
+                    <div class="divider"></div>
+                    <div class="item" id="nav_exit">Exit</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main -->
+        <main id="wrapper">
+            <div class="ui grid" id="mainGrid">
+                <!-- Canvas area -->
+                <div class="program_canvas" style="width: 650px; height: 450px; margin-left: -325px;">
+                    
+                </div>
+
+                <div class="four wide column asideGrid">
+                    <div class="ui segment raised asideSegment">
+                        <div class="ui pointing secondary menu menu segmentHeader">
+                            <a class="item active" data-tab="properties">Properties</a>
+                        </div>
+                        <div class="ui tab active" data-tab="properties">
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="eight wide column">
+                    
+                </div>
+
+                <div class="four wide column asideGrid">
+                    <div class="ui segment raised asideSegment">
+                        <div class="ui pointing secondary menu segmentHeader">
+                            <a class="item active" data-tab="library">Library</a>
+                        </div>
+                        <div class="ui tab active" data-tab="library">
+                            <!-- Library: No assets -->
+                            <div class="ui placeholder segment" id="library_noAssets">
+                                <div class="ui icon header">
+                                    <i class="pdf file outline icon"></i>
+                                    The library is empty.
+                                </div>
+                                <div class="ui primary button" id="library_addAsset">Add Asset</div>
+                            </div>
+
+                            <!-- Library: Asset viewer -->
+                            <div class="ui divided items hidden" id="library_assetViewer">
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+
+        <script>
+            const jQuery = require('jquery');
+            const $ = jQuery;
+
+            require('./assets/semantic/dist/semantic.min.js');
+        </script>
+
+        <script src="./assets/scripts/script.js"></script>
+        
+    </body>
+</html>
