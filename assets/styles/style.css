@@ -3,17 +3,13 @@
     box-sizing: border-box;
     height: 100vh;
     background: #fafafa;
+    -webkit-user-select: none;    
 }
 
 #mainGrid {
     height: 100%;
     margin: 0;
     position: relative;
-}
-
-#nav {
-    -webkit-user-select: none;
-    -webkit-app-region: drag;
 }
 
 #mainGrid .bottomSegment {
@@ -33,6 +29,11 @@
     border: 1px solid #e0e0e0;
 }
 
+/* Nav */
+#nav {
+    -webkit-app-region: drag;
+}
+
 #nav_windowControls {
     position: absolute;
     right: 0;
@@ -41,7 +42,7 @@
     -webkit-app-region: no-drag;
 }
 
-#nav_fileDropdown {
+#nav_fileDropdown, #nav_editDropdown {
     -webkit-app-region: no-drag;
 }
 
@@ -71,6 +72,12 @@
     background-color: #c02020ff;
 }
 
+#nav .dropdown .menu {
+    min-width: 175px;
+}
+
+
+/* Library */
 .libraryAsset .content {
     text-overflow: ellipsis;
     overflow: hidden;
@@ -124,6 +131,7 @@
     z-index: 25;
 }
 
+
 .hidden {
     display: none !important;
 }
@@ -155,9 +163,4 @@
     visibility: hidden;
     margin: 0 !important;
     transition: opacity 0.25s ease;
-}
-
-.dangerArea {
-    color: #C02020 !important;
-    background-color: #C0202030 !important;
 }

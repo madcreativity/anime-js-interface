@@ -21,14 +21,33 @@
                 File
                 <i class="dropdown icon"></i>
                 <div class="menu">
-                    <div class="item" id="nav_newFile">New File</div>
-                    <div class="item" id="nav_openFile">Open File</div>
+                    <div class="item" id="nav_newFile">
+                        New File
+                        <span class="description">Ctrl+N</span>
+                    </div>
+                    <div class="item" id="nav_openFile">
+                        Open File
+                        <span class="description">Ctrl+O</span>
+                    </div>
                     <div class="divider"></div>
-                    <div class="item" id="nav_save">Save</div>
-                    <div class="item" id="nav_saveAs">Save As...</div>
+                    <div class="item" id="nav_save">
+                        Save
+                        <span class="description">Ctrl+S</span>
+                    </div>
+                    <div class="item" id="nav_saveAs">
+                        Save As...
+                        <span class="description">Ctrl+Shift+S</span>
+                    </div>
                     <div class="item" id="nav_export">Export</div>
                     <div class="divider"></div>
                     <div class="item" id="nav_exit">Exit</div>
+                </div>
+            </div>
+            <div class="ui dropdown item" id="nav_editDropdown">
+                Edit
+                <i class="dropdown icon"></i>
+                <div class="menu">
+                    <div class="item" id="nav_canvasSize">Canvas Size</div>
                 </div>
             </div>
             <div class="ui item" id="nav_windowControls">
@@ -48,7 +67,7 @@
 
                 <div class="four wide column asideGrid">
                     <div class="ui segment raised asideSegment">
-                        <div class="ui pointing secondary menu menu segmentHeader">
+                        <div class="ui pointing secondary tabmenu menu segmentHeader">
                             <a class="item active" data-tab="properties">Properties</a>
                         </div>
                         <div class="ui tab active" data-tab="properties">
@@ -70,8 +89,9 @@
 
                 <div class="four wide column asideGrid">
                     <div class="ui segment raised asideSegment">
-                        <div class="ui pointing secondary menu segmentHeader">
+                        <div class="ui pointing secondary tabmenu menu segmentHeader">
                             <a class="item active" data-tab="library">Library</a>
+                            <a class="item" data-tab="elements">Elements</a>
                         </div>
                         <div class="ui tab active" data-tab="library">
                             <!-- Library: No assets -->
@@ -94,6 +114,9 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="ui tab" data-tab="elements">
+                            
+                        </div>
                     </div>
                 </div>
             </div>
@@ -102,12 +125,12 @@
         
         <!-- Context Menu: Library Items -->
         <div class="ui vertical menu contextMenu" id="library_itemContext">
-            <div class="item">
+            <a class="ui item" id="library_itemContextRename">
                 Rename
-            </div>
-            <div class="item dangerArea">
+            </a>
+            <a class="ui item red active" id="library_itemContextDelete">
                 Delete
-            </div>
+            </a>
         </div>
 
 

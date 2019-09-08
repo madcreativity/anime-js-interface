@@ -6,6 +6,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const XMLConverter = require("xml-js");
 
     // DOM
+    const DOMprogramCanvas = document.querySelector(".program_canvas");
+
     const DOMlibraryAddAssetBtns = document.querySelectorAll(".library_addAsset");
     const DOMlibraryNoAssets = document.querySelector("#library_noAssets");
     const DOMlibraryAssetViewer = document.querySelector("#library_assetViewer");
@@ -13,9 +15,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const DOMlibraryAssetView = document.querySelector("#library_assetView");
     const DOMlibraryItemContext = document.querySelector("#library_itemContext");
 
+    const DOMnavNewFile = document.querySelector("#nav_newFile");
     const DOMnavOpenFile = document.querySelector("#nav_openFile");
     const DOMnavSave = document.querySelector("#nav_save");
     const DOMnavSaveAs = document.querySelector("#nav_saveAs");
+    const DOMnavExit = document.querySelector("#nav_exit");
 
     const DOMnavWindowControlMinimize = document.querySelector("#nav_windowControlMinimize");
     const DOMnavWindowControlMaximize = document.querySelector("#nav_windowControlMaximize");
@@ -84,6 +88,9 @@ document.addEventListener("DOMContentLoaded", () => {
             libraryAssetIconElement.className = "file image outline icon";
             libraryAssetContentElement.className = "middle aligned content";
 
+            // Set asset index attribute
+            libraryAssetContentElement.setAttribute("data-index", this.assets.length - 1);
+
             // Set name
             libraryAssetContentElement.textContent = (name !== undefined) ? name : path.slice(path.lastIndexOf("\\") + 1);
 
@@ -92,6 +99,12 @@ document.addEventListener("DOMContentLoaded", () => {
             libraryAssetContainerElement.appendChild(libraryAssetContentElement);
             DOMlibraryItems.appendChild(libraryAssetContainerElement);
         }
+    }
+
+    let setProgramCanvasSize = (width, height) => {
+        DOMprogramCanvas.style.width = SOFT_PROPERTIES.width = width;
+        DOMprogramCanvas.style.height = SOFT_PROPERTIES.height = height;
+        DOMprogramCanvas.style.marginLeft = -(SOFT_PROPERTIES.width / 2);
     }
 
     // Maximize icon
@@ -127,10 +140,15 @@ document.addEventListener("DOMContentLoaded", () => {
     // Setup
     let SOFT_APPDATA = remote.app.getPath("userData");
     let SOFT_PREFERENCES = {};
-
+    let SOFT_SELECTED_ITEMS = [];
+    let SOFT_PROPERTIES = {
+        width: 650,
+        height: 450,
+    };
+    
     if(fs.existsSync(SOFT_APPDATA + "\\preferences.json")) {
         SOFT_PREFERENCES = JSON.parse(fs.readFileSync(SOFT_APPDATA + "\\preferences.json"));
-
+        
         if(SOFT_PREFERENCES.maximized === "true") {
             remote.getCurrentWindow().maximize();
         }
@@ -140,9 +158,10 @@ document.addEventListener("DOMContentLoaded", () => {
             savePath: "",
             maximized: "",
         };
-
+        
         fs.writeFileSync(SOFT_APPDATA + "\\preferences.json", JSON.stringify(SOFT_PREFERENCES));
     }
+    
 
     let SOFT_LIBRARY = new Library();
 
@@ -153,11 +172,22 @@ document.addEventListener("DOMContentLoaded", () => {
             let thisTarget = e.target;
             if(e.target.parentNode.classList.contains("libraryAsset")) thisTarget = e.target.parentNode;
 
-            document.querySelectorAll("#library_items .libraryAsset").forEach((element) => element.classList.remove("active"));
+            if(!e.shiftKey) {
+                document.querySelectorAll("#library_items .libraryAsset").forEach((element) => element.classList.remove("active"));
+                thisTarget.classList.add("active");
+                DOMlibraryAssetView.style.backgroundImage = "url(" + SOFT_LIBRARY.assets[0].path + ")";
+            } else {
+                if(thisTarget.classList.contains("active")) {
+                    thisTarget.classList.remove("active");
+                    DOMlibraryAssetView.style.backgroundImage = "none";
+                } else {
+                    thisTarget.classList.add("active");
+                }
+            }
 
-
-            thisTarget.classList.add("active");
-            DOMlibraryAssetView.style.backgroundImage = "url(" + SOFT_LIBRARY.assets[0].path + ")";
+            document.querySelectorAll("#library_items .libraryAsset").forEach((element) => {
+                SOFT_SELECTED_ITEMS[SOFT_SELECTED_ITEMS.length] = parseInt(element.getAttribute("data-index"));
+            });
         }
     });
 
@@ -167,11 +197,19 @@ document.addEventListener("DOMContentLoaded", () => {
             let thisTarget = e.target;
             if(e.target.parentNode.classList.contains("libraryAsset")) thisTarget = e.target.parentNode;
 
-
+            
             DOMlibraryItemContext.style.opacity = "1";
             DOMlibraryItemContext.style.visibility = "visible";
             DOMlibraryItemContext.style.left = e.clientX + "px";
             DOMlibraryItemContext.style.top = e.clientY + "px";
+        }
+    });
+
+    DOMlibraryItemContext.addEventListener("click", (e) => {
+        if(e.target.id === "library_itemContextRename") {
+
+        } else if(e.target.id === "library_itemContextDelete") {
+            
         }
     });
 
@@ -220,17 +258,27 @@ document.addEventListener("DOMContentLoaded", () => {
             if(!result.canceled) {
                 let readData = XMLConverter.xml2js(fs.readFileSync(result.filePaths[0]), { ignoreComment: true, compact: true });
                 
+                setProgramCanvasSize(parseInt(readData["root"]["_attributes"]["width"]), parseInt(readData["root"]["_attributes"]["height"]));
+
                 // Assets start
                 for(let i = 0; i < readData["root"]["assets"]["asset"].length; i++) {
                     SOFT_LIBRARY.loadAssets(readData["root"]["assets"]["asset"][i]["_attributes"]["path"], readData["root"]["assets"]["asset"][i]["_attributes"]["name"]);
                 }
                 // Assets end
+
+                SOFT_PREFERENCES.savePath = result.filePaths[0];
+                updatePreferenceFile();
             }
         }).catch((err) => {
             console.error(err);
         });
         
     }
+
+    // Nav - Exit
+    DOMnavExit.addEventListener("click", () => {
+        remote.getCurrentWindow().close();        
+    });
 
     // Nav - Save
     DOMnavSave.addEventListener("click", () => {
@@ -245,6 +293,8 @@ document.addEventListener("DOMContentLoaded", () => {
         let writer = new XMLWriter();
         writer.startDocument();
         writer.startElement("root");
+        writer.writeAttribute("width", SOFT_PROPERTIES.width);
+        writer.writeAttribute("height", SOFT_PROPERTIES.height);
         
         // Assets start
         writer.startElement("assets");
@@ -258,6 +308,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
         writer.endElement();
         // Assets end
+
+        // Elements start
+        writer.startElement("elements");
+
+        for(let i = 0; i < SOFT_ELEMENTS.length; i++) {
+            writer.startElement("element");
+            
+            // Add attributes
+
+            writer.endElement();
+        }
+
+        writer.endElement();
+        // Elements end
+
+        // Elements start
+        writer.startElement("elements");
+
+        for(let i = 0; i < SOFT_ELEMENTS.length; i++) {
+            writer.startElement("element");
+            
+            // Add attributes
+
+            writer.endElement();
+        }
+
+        writer.endElement();
+        // Elements end
 
 
         writer.endDocument();
@@ -301,6 +379,29 @@ document.addEventListener("DOMContentLoaded", () => {
     // Nav - Close Window
     DOMnavWindowControlClose.addEventListener("click", () => {
         remote.getCurrentWindow().close();
+    });
+
+    // Shortcuts
+    document.addEventListener("keydown", (e) => {
+        // Nav - New File
+        if (e.ctrlKey && e.which == 78) {
+            DOMnavNewFile.click();
+        }
+
+        // Nav - Open File
+        if (e.ctrlKey && e.which == 79) {
+            DOMnavOpenFile.click();
+        }
+
+        // Nav - Save
+        else if (e.ctrlKey && !e.shiftKey && e.which == 83) {
+            DOMnavSave.click();
+        }
+
+        // Nav - Save As
+        else if (e.ctrlKey && e.shiftKey && e.which == 83) {
+            DOMnavSaveAs.click();
+        }
     });
 
 
