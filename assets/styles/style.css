@@ -71,6 +71,15 @@
     overflow-wrap: break-word;
 }
 
+#library_items .libraryAsset {
+    padding: 1em !important;
+}
+
+#library_items .libraryAsset:hover {
+    background-color: #f0f0f0;
+    cursor: pointer;
+}
+
 #library_assetViewer .item .icon {
     width: auto;
     height: 2rem;
@@ -88,7 +97,8 @@
 }
 
 #library_items {
-    padding: 0 14px;
+    margin-top: 0;
+    padding: 0;
 }
 
 #library_controlContainer {
@@ -109,7 +119,7 @@
 
 .ui.segment.asideSegment {
     overflow-y: auto;
-    padding: 0 0 14px 0;
+    padding: 0;
 }
 
 .ui.segment.asideSegment .segmentHeader {

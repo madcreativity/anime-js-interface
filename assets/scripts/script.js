@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const DOMlibraryAssetViewer = document.querySelector("#library_assetViewer");
     const DOMlibraryItems = document.querySelector("#library_items");
 
+    const DOMnavOpenFile = document.querySelector("#nav_openFile");
     const DOMnavSave = document.querySelector("#nav_save");
     const DOMnavSaveAs = document.querySelector("#nav_saveAs");
 
@@ -90,9 +91,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    let updatePreferenceFile = () => {
+        fs.writeFileSync(SOFT_APPDATA + "\\preferences.json", JSON.stringify(SOFT_PREFERENCES));
+    }
+
 
     // Setup
-    let SOFT_APPDATA = remote.app.getAppPath();
+    let SOFT_APPDATA = remote.app.getPath("userData");
     let SOFT_PREFERENCES = {};
 
     if(fs.existsSync(SOFT_APPDATA + "\\preferences.json")) {
@@ -109,9 +114,17 @@ document.addEventListener("DOMContentLoaded", () => {
     let SOFT_LIBRARY = new Library();
 
 
+    // Library - Item Selection
+    DOMlibraryItems.addEventListener("click", (e) => {
+        if(e.target.classList.contains("libraryAsset") || e.target.parentNode.classList.contains("libraryAsset")) {
+            console.log("test");
+        }
+    });
+
     // Library - Add Asset
     DOMlibraryAddAssetBtns.forEach((button) => {
         button.addEventListener("click", () => {
+            let defaultPath = (SOFT_PREFERENCES.openPath !== "") ? SOFT_PREFERENCES.openPath : ""
             dialog.showOpenDialog({
                 properties: [
                     "openFile",
@@ -119,16 +132,51 @@ document.addEventListener("DOMContentLoaded", () => {
                 ],
                 filters: [
                     { name: "Images", extensions: ["png", "jpg", "jpeg", "gif"] }
-                ]
+                ],
+                defaultPath: defaultPath
             }).then((result) => {
                 if(!result.canceled) {
                     SOFT_LIBRARY.loadAssets(result.filePaths);
+
+                    SOFT_PREFERENCES.openPath = result.filePaths[0];
+                    updatePreferenceFile();
                 }
             }).catch((err) => {
                 console.error(err);
             });
         });
     });
+
+    // Nav - Load
+    DOMnavOpenFile.addEventListener("click", () => {
+        loadFile();
+    });
+
+    let loadFile = () => {
+        let defaultPath = (SOFT_PREFERENCES.savePath !== "") ? SOFT_PREFERENCES.savePath : "interface"
+        dialog.showOpenDialog({
+            properties: [
+                "openFile"
+            ],
+            filters: [
+                { name: "Anime.js Interface File", extensions: ["ajsi"] }
+            ],
+            defaultPath: defaultPath
+        }).then((result) => {
+            if(!result.canceled) {
+                let readData = XMLConverter.xml2js(fs.readFileSync(result.filePaths[0]), { ignoreComment: true, compact: true });
+                
+                // Assets start
+                for(let i = 0; i < readData["root"]["assets"]["asset"].length; i++) {
+                    SOFT_LIBRARY.loadAssets(readData["root"]["assets"]["asset"][i]["_attributes"]["path"]);
+                }
+                // Assets end
+            }
+        }).catch((err) => {
+            console.error(err);
+        });
+        
+    }
 
     // Nav - Save
     DOMnavSave.addEventListener("click", () => {
@@ -162,16 +210,18 @@ document.addEventListener("DOMContentLoaded", () => {
         if(SOFT_PREFERENCES.savePath !== "" && !isSaveAs) {
             fs.writeFileSync(SOFT_PREFERENCES.savePath, writer.toString());
         } else {
+            let defaultPath = (SOFT_PREFERENCES.savePath !== "") ? SOFT_PREFERENCES.savePath : "interface"
             dialog.showSaveDialog({
-                defaultPath: "interface",
                 filters: [
                     { name: "Anime.js Interface File", extensions: ["ajsi"] }
-                ]
+                ],
+                defaultPath: defaultPath
             }).then((result) => {
                 if(!result.canceled) {
                     fs.writeFileSync(result.filePath, writer.toString());
 
                     SOFT_PREFERENCES.savePath = result.filePath;
+                    updatePreferenceFile();
                 }
             }).catch((err) => {
                 console.error(err);
@@ -181,37 +231,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Nav - Minimize Window
     DOMnavWindowControlMinimize.addEventListener("click", () => {
-        remote.BrowserWindow.getFocusedWindow().minimize();
+        remote.getCurrentWindow().minimize();
     });
 
     // Nav - Maximize Window/Restore
     DOMnavWindowControlMaximize.addEventListener("click", () => {
-        if(!remote.BrowserWindow.getFocusedWindow().isMaximized()) {
-            remote.BrowserWindow.getFocusedWindow().maximize();
+        if(!remote.getCurrentWindow().isMaximized()) {
+            remote.getCurrentWindow().maximize();
         } else {
-            remote.BrowserWindow.getFocusedWindow().restore();            
+            remote.getCurrentWindow().restore();            
         }
     });
 
     let updateMaximizeIcon = () => {
-        if(!remote.BrowserWindow.getFocusedWindow().isMaximized()) {
+        if(!remote.getCurrentWindow().isMaximized()) {
             DOMnavWindowControlMaximizeIcon.classList.replace("restore", "maximize");            
         } else {
             DOMnavWindowControlMaximizeIcon.classList.replace("maximize", "restore");
         }
     };
 
-    remote.BrowserWindow.getFocusedWindow().on("maximize", () => {
+    remote.getCurrentWindow().on("maximize", () => {
         updateMaximizeIcon();
     });
 
-    remote.BrowserWindow.getFocusedWindow().on("unmaximize", () => {
+    remote.getCurrentWindow().on("unmaximize", () => {
         updateMaximizeIcon();
     });
 
     // Nav - Close Window
     DOMnavWindowControlClose.addEventListener("click", () => {
-        remote.BrowserWindow.getFocusedWindow().close();
+        remote.getCurrentWindow().close();
     });
 
 
