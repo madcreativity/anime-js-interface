@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const DOMlibraryNoAssets = document.querySelector("#library_noAssets");
     const DOMlibraryAssetViewer = document.querySelector("#library_assetViewer");
     const DOMlibraryItems = document.querySelector("#library_items");
+    const DOMlibraryAssetView = document.querySelector("#library_assetView");
+    const DOMlibraryItemContext = document.querySelector("#library_itemContext");
 
     const DOMnavOpenFile = document.querySelector("#nav_openFile");
     const DOMnavSave = document.querySelector("#nav_save");
@@ -22,9 +24,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // Objects
-    function Asset(asset, path, type) {
+    function Asset(name, asset, path, type) {
+        this.name = name;
         this.asset = asset;
-        this.path = path;
+        this.path = path.replace(/\\/g, "/");
         this.type = type;
     }
 
@@ -35,13 +38,13 @@ document.addEventListener("DOMContentLoaded", () => {
             this.loadedAssets = [];
         }
 
-        loadAssets(paths) {
+        loadAssets(paths, name) {
             if(paths !== undefined) {
                 if(typeof(paths) === "string") {
-                    this.addAsset(paths);
+                    this.addAsset(paths, name);
                 } else {
                     for(let i = 0; i < paths.length; i++) {
-                        this.addAsset(paths[i]);
+                        this.addAsset(paths[i], name);
                     }
                 }
             } else {
@@ -50,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        addAsset(path) {
+        addAsset(path, name) {
             if(path.endsWith(".png") || path.endsWith(".jpg") || path.endsWith(".jpeg") || path.endsWith(".gif")) {
                 let newAsset = new Image();
                 newAsset.src = path;
@@ -59,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
 
 
-                this.assets[this.assets.length] = new Asset(newAsset, path, "IMAGE");
+                this.assets[this.assets.length] = new Asset((name !== undefined) ? name : path.slice(path.lastIndexOf("\\") + 1), newAsset, path, "IMAGE");
                 this.loadedAssets[this.loadedAssets.length] = false;
             } else {
                 return;
@@ -82,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
             libraryAssetContentElement.className = "middle aligned content";
 
             // Set name
-            libraryAssetContentElement.textContent = path.slice(path.lastIndexOf("\\") + 1);
+            libraryAssetContentElement.textContent = (name !== undefined) ? name : path.slice(path.lastIndexOf("\\") + 1);
 
             // Add to document
             libraryAssetContainerElement.appendChild(libraryAssetIconElement);
@@ -91,6 +94,31 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // Maximize icon
+    let updateMaximizeIcon = () => {
+        if(!remote.getCurrentWindow().isMaximized()) {
+            DOMnavWindowControlMaximizeIcon.classList.replace("restore", "maximize");            
+
+            SOFT_PREFERENCES.maximized = "false";
+            updatePreferenceFile();
+        } else {
+            DOMnavWindowControlMaximizeIcon.classList.replace("maximize", "restore");
+
+            SOFT_PREFERENCES.maximized = "true";
+            updatePreferenceFile();
+        }
+    };
+
+    remote.getCurrentWindow().on("maximize", () => {
+        updateMaximizeIcon();
+    });
+
+    remote.getCurrentWindow().on("unmaximize", () => {
+        updateMaximizeIcon();
+    });
+
+
+    // Update "preferences.json"
     let updatePreferenceFile = () => {
         fs.writeFileSync(SOFT_APPDATA + "\\preferences.json", JSON.stringify(SOFT_PREFERENCES));
     }
@@ -102,10 +130,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if(fs.existsSync(SOFT_APPDATA + "\\preferences.json")) {
         SOFT_PREFERENCES = JSON.parse(fs.readFileSync(SOFT_APPDATA + "\\preferences.json"));
+
+        if(SOFT_PREFERENCES.maximized === "true") {
+            remote.getCurrentWindow().maximize();
+        }
     } else {
         SOFT_PREFERENCES = {
             openPath: "",
-            savePath: ""
+            savePath: "",
+            maximized: "",
         };
 
         fs.writeFileSync(SOFT_APPDATA + "\\preferences.json", JSON.stringify(SOFT_PREFERENCES));
@@ -117,7 +150,28 @@ document.addEventListener("DOMContentLoaded", () => {
     // Library - Item Selection
     DOMlibraryItems.addEventListener("click", (e) => {
         if(e.target.classList.contains("libraryAsset") || e.target.parentNode.classList.contains("libraryAsset")) {
-            console.log("test");
+            let thisTarget = e.target;
+            if(e.target.parentNode.classList.contains("libraryAsset")) thisTarget = e.target.parentNode;
+
+            document.querySelectorAll("#library_items .libraryAsset").forEach((element) => element.classList.remove("active"));
+
+
+            thisTarget.classList.add("active");
+            DOMlibraryAssetView.style.backgroundImage = "url(" + SOFT_LIBRARY.assets[0].path + ")";
+        }
+    });
+
+    // Library - Item Context Menu
+    DOMlibraryItems.addEventListener("contextmenu", (e) => {
+        if(e.target.classList.contains("libraryAsset") || e.target.parentNode.classList.contains("libraryAsset")) {
+            let thisTarget = e.target;
+            if(e.target.parentNode.classList.contains("libraryAsset")) thisTarget = e.target.parentNode;
+
+
+            DOMlibraryItemContext.style.opacity = "1";
+            DOMlibraryItemContext.style.visibility = "visible";
+            DOMlibraryItemContext.style.left = e.clientX + "px";
+            DOMlibraryItemContext.style.top = e.clientY + "px";
         }
     });
 
@@ -168,7 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 // Assets start
                 for(let i = 0; i < readData["root"]["assets"]["asset"].length; i++) {
-                    SOFT_LIBRARY.loadAssets(readData["root"]["assets"]["asset"][i]["_attributes"]["path"]);
+                    SOFT_LIBRARY.loadAssets(readData["root"]["assets"]["asset"][i]["_attributes"]["path"], readData["root"]["assets"]["asset"][i]["_attributes"]["name"]);
                 }
                 // Assets end
             }
@@ -197,6 +251,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         for(let i = 0; i < SOFT_LIBRARY.assets.length; i++) {
             writer.startElement("asset");
+            writer.writeAttribute("name", SOFT_LIBRARY.assets[i].name);
             writer.writeAttribute("path", SOFT_LIBRARY.assets[i].path);
             writer.endElement();
         }
@@ -241,22 +296,6 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             remote.getCurrentWindow().restore();            
         }
-    });
-
-    let updateMaximizeIcon = () => {
-        if(!remote.getCurrentWindow().isMaximized()) {
-            DOMnavWindowControlMaximizeIcon.classList.replace("restore", "maximize");            
-        } else {
-            DOMnavWindowControlMaximizeIcon.classList.replace("maximize", "restore");
-        }
-    };
-
-    remote.getCurrentWindow().on("maximize", () => {
-        updateMaximizeIcon();
-    });
-
-    remote.getCurrentWindow().on("unmaximize", () => {
-        updateMaximizeIcon();
     });
 
     // Nav - Close Window

@@ -2,6 +2,7 @@
     padding-top: 45px;
     box-sizing: border-box;
     height: 100vh;
+    background: #fafafa;
 }
 
 #mainGrid {
@@ -15,8 +16,12 @@
     -webkit-app-region: drag;
 }
 
-#mainGrid .segment {
-    height: 100%;
+#mainGrid .bottomSegment {
+    height: 30vh;
+    bottom: 14px;
+    position: absolute;
+    width: 100%;
+    left: 0;
 }
 
 .program_canvas {
@@ -24,7 +29,8 @@
     top: 0;
     left: 50%;
     padding: 0;
-    transform: scale(1);
+    image-rendering: pixelated;
+    border: 1px solid #e0e0e0;
 }
 
 #nav_windowControls {
@@ -94,11 +100,20 @@
     display: block;
     margin: 8px auto;
     background: #e0e0e0;
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    image-rendering: pixelated;
 }
 
 #library_items {
     margin-top: 0;
     padding: 0;
+}
+
+#library_items .libraryAsset.active {
+    background-color: #f0f0f0;
+    font-weight: bold;
 }
 
 #library_controlContainer {
@@ -120,6 +135,7 @@
 .ui.segment.asideSegment {
     overflow-y: auto;
     padding: 0;
+    height: 100%;
 }
 
 .ui.segment.asideSegment .segmentHeader {
@@ -128,4 +144,20 @@
     background: white;
     z-index: 50;
     margin-bottom: 0;
+}
+
+/* Context Menus */
+.contextMenu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    visibility: hidden;
+    margin: 0 !important;
+    transition: opacity 0.25s ease;
+}
+
+.dangerArea {
+    color: #C02020 !important;
+    background-color: #C0202030 !important;
 }
