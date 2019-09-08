@@ -10,6 +10,11 @@
     position: relative;
 }
 
+#nav {
+    -webkit-user-select: none;
+    -webkit-app-region: drag;
+}
+
 #mainGrid .segment {
     height: 100%;
 }
@@ -22,14 +27,48 @@
     transform: scale(1);
 }
 
+#nav_windowControls {
+    position: absolute;
+    right: 0;
+    height: 100%;
+    padding: 0;
+    -webkit-app-region: no-drag;
+}
+
+#nav_fileDropdown {
+    -webkit-app-region: no-drag;
+}
+
+#nav_windowControls::before {
+    display: none;
+}
+
+#nav_windowControls > button {
+    padding: 0 15px;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 0;
+    background-color: #ffffff00;
+    color: rgba(255,255,255,.9);
+    outline: none !important;
+    transition: background-color 0.1s ease;
+}
+
+#nav_windowControls > button:hover {
+    background-color: #ffffff10;
+    cursor: pointer;
+}
+
+#nav_windowControls #nav_windowControlClose:hover {
+    background-color: #c02020ff;
+}
+
 .libraryAsset .content {
     text-overflow: ellipsis;
     overflow: hidden;
     overflow-wrap: break-word;
-}
-
-#library_assetViewer {
-    padding: 0 14px;
 }
 
 #library_assetViewer .item .icon {
@@ -37,6 +76,27 @@
     height: 2rem;
     font-size: 2rem;
     line-height: 2rem;
+}
+
+#library_assetView {
+    height: 12vw;
+    max-width: 12vw;
+    width: 100%;
+    display: block;
+    margin: 8px auto;
+    background: #e0e0e0;
+}
+
+#library_items {
+    padding: 0 14px;
+}
+
+#library_controlContainer {
+    padding: 20px 8px 8px 8px;
+    position: sticky;
+    background-color: white;
+    top: 40px;
+    z-index: 25;
 }
 
 .hidden {
@@ -57,4 +117,5 @@
     top: 0;
     background: white;
     z-index: 50;
+    margin-bottom: 0;
 }

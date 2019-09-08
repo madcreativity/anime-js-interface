@@ -9,6 +9,10 @@
         "electron": "^6.0.7"
     },
     "dependencies": {
-        "jquery": "^3.4.1"
+        "asar": "^2.0.1",
+        "electron-packager": "^14.0.5",
+        "jquery": "^3.4.1",
+        "xml-js": "^1.6.11",
+        "xml-writer": "^1.7.0"
     }
 }

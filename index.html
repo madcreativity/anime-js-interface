@@ -13,11 +13,11 @@
     <body>
 
         <!-- Menu -->
-        <div class="ui top fixed inverted tiny menu">
+        <div class="ui top fixed inverted tiny menu" id="nav">
             <div class="ui item">
-                <img src="./assets/images/logo.png" alt="Logo">
+                <img src="./assets/images/logo.png">
             </div>
-            <div class="ui dropdown item">
+            <div class="ui dropdown item" id="nav_fileDropdown">
                 File
                 <i class="dropdown icon"></i>
                 <div class="menu">
@@ -30,6 +30,11 @@
                     <div class="divider"></div>
                     <div class="item" id="nav_exit">Exit</div>
                 </div>
+            </div>
+            <div class="ui item" id="nav_windowControls">
+                <button class="item" id="nav_windowControlMinimize"><i class="window minimize outline icon"></i></button>
+                <button class="item" id="nav_windowControlMaximize"><i class="window maximize outline icon"></i></button>
+                <button class="item" id="nav_windowControlClose"><i class="window close outline icon"></i></button>
             </div>
         </div>
 
@@ -65,15 +70,21 @@
                             <!-- Library: No assets -->
                             <div class="ui placeholder segment" id="library_noAssets">
                                 <div class="ui icon header">
-                                    <i class="pdf file outline icon"></i>
+                                    <i class="file outline icon"></i>
                                     The library is empty.
                                 </div>
-                                <div class="ui primary button" id="library_addAsset">Add Asset</div>
+                                <div class="ui primary button library_addAsset">Add Asset</div>
                             </div>
 
                             <!-- Library: Asset viewer -->
-                            <div class="ui divided items hidden" id="library_assetViewer">
-                                
+                            <div class="hidden" id="library_assetViewer">
+                                <div id="library_controlContainer">
+                                    <div id="library_assetView"></div>
+                                    <div class="ui primary button library_addAsset">Add Asset</div>
+                                </div>
+                                <div class="ui divided items" id="library_items">
+
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -87,9 +98,8 @@
             const $ = jQuery;
 
             require('./assets/semantic/dist/semantic.min.js');
+            require('./assets/scripts/script.js');
         </script>
-
-        <script src="./assets/scripts/script.js"></script>
         
     </body>
 </html>

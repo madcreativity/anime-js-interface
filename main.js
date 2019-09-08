@@ -10,7 +10,8 @@ function createWindow () {
       nodeIntegration: true
     },
     autoHideMenuBar: true,
-    icon: "./assets/images/logo.png"
+    icon: "./assets/images/logo.png",
+    frame: false,
   });
 
   win.loadFile('index.html');
