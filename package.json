@@ -11,7 +11,7 @@
     "dependencies": {
         "asar": "^2.0.1",
         "electron-packager": "^14.0.5",
-        "jquery": "^3.4.1",
+        "jquery": "^3.5.0",
         "xml-js": "^1.6.11",
         "xml-writer": "^1.7.0"
     }
